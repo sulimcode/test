@@ -1,0 +1,52 @@
+{
+  "version": 2,
+  "buildCommand": "node --no-warnings vercel-build.cjs && npm run build",
+  "installCommand": "npm install",
+  "outputDirectory": "dist",
+  "framework": "vite",
+  "regions": ["iad1"],
+  "functions": {
+    "api/vercel-health.js": {
+      "runtime": "@vercel/node@2.10.0",
+      "maxDuration": 5
+    },
+    "api/handler.js": {
+      "runtime": "@vercel/node@2.10.0", 
+      "maxDuration": 10
+    }
+  },
+  "builds": [
+    { "src": "api/vercel-health.js", "use": "@vercel/node" },
+    { "src": "api/handler.js", "use": "@vercel/node" },
+    { "src": "dist/**", "use": "@vercel/static" }
+  ],
+  "routes": [
+    { "handle": "filesystem" },
+    { "src": "/api/health", "dest": "/api/vercel-health.js" },
+    { "src": "/api/test", "dest": "/api/handler.js" },
+    { "src": "/api/time", "dest": "/api/handler.js" },
+    { "src": "/api/(.*)", "dest": "/api/handler.js" },
+    { "src": "/(.*)", "dest": "/index.html" }
+  ],
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        { "key": "Access-Control-Allow-Credentials", "value": "true" },
+        { "key": "Access-Control-Allow-Origin", "value": "*" },
+        { "key": "Access-Control-Allow-Methods", "value": "GET,OPTIONS,PATCH,DELETE,POST,PUT" },
+        { "key": "Access-Control-Allow-Headers", "value": "X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version" }
+      ]
+    }
+  ],
+  "build": {
+    "env": {
+      "NODE_VERSION": "18.x"
+    }
+  },
+  "env": {
+    "NODE_ENV": "production",
+    "VERCEL_DEPLOYMENT": "true"
+  },
+  "public": true
+}
